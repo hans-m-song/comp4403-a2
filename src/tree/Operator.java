@@ -16,8 +16,8 @@ public enum Operator {
     LEQUALS_OP("_<=_"),
     GEQUALS_OP("_>=_"),
     /* unary operators */
-    PRED_OP("pred_"),
-    SUCC_OP("succ_"),
+    PRED_OP("pred_", 1),
+    SUCC_OP("succ_", 1),
     NEG_OP("-_", 1),
     INVALID_OP("INVALID");
 
