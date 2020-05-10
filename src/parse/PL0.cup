@@ -149,6 +149,8 @@ non terminal                  ConstDefSeq,
 non terminal ConstExp         Constant;
 non terminal                  TypeDefSeq, 
                               TypeDef;
+non terminal List<Type.EnumerationElement> EnumerationList;
+non terminal Type.EnumerationElement EnumerationElement;
 non terminal Type             Type,
                               TypeIdentifier;
 non terminal                  VarDeclSeq, 
@@ -331,11 +333,34 @@ Type ::= TypeIdentifier:type
         {:
             RESULT = new Type.SubrangeType(subrxleft, lo, hi);
         :}
+    | LCURLY:en EnumerationList:el RCURLY
+        {:
+            RESULT = new Type.EnumerationType(enxleft, el, currentScope);
+        :}
     | error:err
         {:
             RESULT = Type.ERROR_TYPE;
         :}
     ;
+
+EnumerationList ::= EnumerationElement:e
+        {:
+            RESULT = new ArrayList<>();
+            RESULT.add(e);
+        :}
+    | EnumerationList:el COMMA EnumerationElement:e
+        {:
+            el.add(e);
+            RESULT = el;
+        :}
+    ;
+
+EnumerationElement ::= IDENTIFIER:id
+        {:
+            RESULT = new Type.EnumerationElement(id, idxleft);
+        :}
+    ;
+
 TypeIdentifier ::= IDENTIFIER:id
         {: /* As the type identifier may not be defined at this point.
             * IdRefType records the id, as well as the symbol table scope
