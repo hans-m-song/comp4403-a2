@@ -445,6 +445,14 @@ public class StaticChecker implements DeclVisitor, StatementVisitor,
         return newNode;
     }
 
+    public ExpNode visitArrayDereferenceNode(ExpNode.ArrayDereferenceNode node) {
+        beginCheck("ArrayDereference");
+        node.setLeftValue(node.getLeftValue().transform(this));
+        node.setIndex(node.getIndex().transform(this));
+        endCheck("ArrayDereference");
+        return node;
+    }
+
     /**
      * Variable node is set up by Identifier node - no checks needed
      */

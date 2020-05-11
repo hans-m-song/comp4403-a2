@@ -309,6 +309,50 @@ public abstract class ExpNode {
         }
 
     }
+
+    public static class ArrayDereferenceNode extends ExpNode {
+
+        private ExpNode leftValue;
+        private ExpNode index;
+
+        public ArrayDereferenceNode(Location loc, ExpNode leftValue, ExpNode index) {
+            super(loc);
+            this.leftValue = leftValue;
+            this.index = index;
+        }
+
+        public void setLeftValue(ExpNode leftValue) {
+            this.leftValue = leftValue;
+        }
+
+        public ExpNode getLeftValue() {
+            return leftValue;
+        }
+
+        public void setIndex(ExpNode index) {
+            this.index = index;
+        }
+
+        public ExpNode getIndex() {
+            return index;
+        }
+
+        @Override
+        public ExpNode transform(ExpTransform<ExpNode> visitor) {
+            return visitor.visitArrayDereferenceNode(this);
+        }
+
+        @Override
+        public Code genCode(ExpTransform<Code> visitor) {
+            return visitor.visitArrayDereferenceNode(this);
+        }
+
+        @Override
+        public String toString() {
+            return "ArrayDereference(" + leftValue + ", " + index + ")";
+        }
+    }
+
     /**
      * Tree node for the coercion representing a dereference of an LValue.
      * A Dereference node references an ExpNode node and represents the

@@ -406,6 +406,14 @@ public class CodeGenerator implements DeclVisitor, StatementTransform<Code>,
         endGen("WidenSubrange");
         return code;
     }
+
+    public Code visitArrayDereferenceNode(ExpNode.ArrayDereferenceNode node) {
+        beginGen("ArrayDereference");
+        Code code = new Code();
+        endGen("ArrayDereference");
+        return code;
+    }
+
     //**************************** Support Methods
 
     /**
