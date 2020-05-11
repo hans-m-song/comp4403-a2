@@ -337,6 +337,10 @@ Type ::= TypeIdentifier:type
         {:
             RESULT = new Type.EnumerationType(enxleft, el, currentScope);
         :}
+    | KW_ARRAY Type:ti KW_OF Type:te
+        {:
+            RESULT = new Type.ArrayType(tixleft, ti, te);
+        :}
     | error:err
         {:
             RESULT = Type.ERROR_TYPE;
@@ -497,6 +501,10 @@ LValue ::= IDENTIFIER:id
              * a ConstNode or a VariableNode or detected as invalid.
              */
             RESULT = new ExpNode.IdentifierNode(idxleft, id);
+        :}
+    | LValue:lv LBRACKET Condition:c RBRACKET
+        {:
+            RESULT = new ExpNode.ArrayDereferenceNode(lvxleft, lv, c);
         :}
     | error:e
         {:
