@@ -409,15 +409,21 @@ public class CodeGenerator implements DeclVisitor, StatementTransform<Code>,
 
     public Code visitArrayDereferenceNode(ExpNode.ArrayDereferenceNode node) {
         beginGen("ArrayDereference");
-        ExpNode.VariableNode leftValue = (ExpNode.VariableNode) node.getLeftValue();
-        Type.ScalarType arrayType = (Type.ScalarType) leftValue.getVariable()
-                .getType().optDereferenceType().getArrayType().getArgType();
-        ExpNode.VariableNode index = (ExpNode.VariableNode) node.getIndex();
+        ExpNode leftValue = node.getLeftValue();
         Code code = leftValue.genCode(this);
+        Type.ScalarType bounds = (Type.ScalarType) leftValue.getType()
+                .getArrayType().getArgType();
+        ExpNode index = node.getIndex();
         code.append(index.genCode(this));
-        code.genLoad(index.getType());
-        code.genBoundsCheck(arrayType.getLower(), arrayType.getUpper());
-        System.out.println(code.toString());
+        if (index instanceof ExpNode.VariableNode) {
+            code.genLoad(index.getType());
+        }
+        int lower = bounds.getLower();
+        int upper = bounds.getUpper();
+        code.genBoundsCheck(lower, upper);
+        code.genLoadConstant(-lower);
+        code.generateOp(Operation.ADD);
+        code.generateOp(Operation.ADD);
         endGen("ArrayDereference");
         return code;
     }
