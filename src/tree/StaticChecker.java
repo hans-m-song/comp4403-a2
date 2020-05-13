@@ -237,6 +237,10 @@ public class StaticChecker implements DeclVisitor, StatementVisitor,
     public void visitForNode(ForNode node) {
 
         beginCheck("For");
+        node.setIndex(node.getIndex().transform(this));
+        node.setLower(node.getLower().transform(this));
+        node.setUpper(node.getUpper().transform(this));
+        node.getBody().accept(this);
         endCheck("For");
     }
 
