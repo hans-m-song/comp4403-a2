@@ -410,17 +410,26 @@ public class CodeGenerator implements DeclVisitor, StatementTransform<Code>,
     public Code visitArrayDereferenceNode(ExpNode.ArrayDereferenceNode node) {
         beginGen("ArrayDereference");
         ExpNode leftValue = node.getLeftValue();
-        Code code = leftValue.genCode(this);
-        Type.ScalarType bounds = (Type.ScalarType) leftValue.getType()
-                .getArrayType().getArgType();
         ExpNode index = node.getIndex();
+        Code code = leftValue.genCode(this);
         code.append(index.genCode(this));
         if (index instanceof ExpNode.VariableNode) {
             code.genLoad(index.getType());
         }
+        Type.ScalarType bounds = (Type.ScalarType) leftValue.getType()
+                .getArrayType().getArgType();
         int lower = bounds.getLower();
         int upper = bounds.getUpper();
         code.genBoundsCheck(lower, upper);
+        if (leftValue instanceof ExpNode.ArrayDereferenceNode) {
+            ExpNode.ArrayDereferenceNode subNode = (ExpNode.ArrayDereferenceNode) leftValue;
+            Type.ScalarType subBounds = (Type.ScalarType) subNode.getLeftValue().getType().getArrayType().getArgType();
+            int subLower = subBounds.getLower();
+            int subUpper = subBounds.getUpper();
+            System.out.println("SUB ARRAY " + leftValue + " WIDTH " + (subUpper + 1 - subLower));
+            code.genLoadConstant(subUpper + 1 - subLower);
+            code.generateOp(Operation.MPY);
+        }
         code.genLoadConstant(-lower);
         code.generateOp(Operation.ADD);
         code.generateOp(Operation.ADD);
