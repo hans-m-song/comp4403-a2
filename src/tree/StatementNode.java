@@ -1,6 +1,7 @@
 package tree;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import java_cup.runtime.ComplexSymbolFactory.Location;
 import syms.Scope;
@@ -445,6 +446,66 @@ public abstract class StatementNode {
         public String toString(int level) {
             return "WHILE " + condition.toString() + " DO" +
                     newLine(level + 1) + loopStmt.toString(level + 1);
+        }
+    }
+
+    public static class ForNode extends StatementNode {
+        private ExpNode index;
+        private ExpNode lower;
+        private ExpNode upper;
+        private ListNode body;
+
+        public ForNode(Location loc, ExpNode index, ExpNode lower,
+                       ExpNode upper, ListNode body) {
+            super(loc);
+            this.index = index;
+            this.lower = lower;
+            this.upper = upper;
+            this.body = body;
+        }
+
+        @Override
+        public void accept(StatementVisitor visitor) {
+            visitor.visitForNode(this);
+        }
+
+        @Override
+        public Code genCode(StatementTransform<Code> visitor) {
+            return visitor.visitForNode(this);
+        }
+
+        @Override
+        public String toString(int level) {
+            return "FOR " + index + " : [" + lower + ".." + upper + "] DO" +
+                    newLine(level + 1) + body.toString(level + 1);
+        }
+
+        public ExpNode getIndex() {
+            return index;
+        }
+
+        public void setIndex(ExpNode index) {
+            this.index = index;
+        }
+
+        public ExpNode getLower() {
+            return lower;
+        }
+
+        public void setLower(ExpNode lower) {
+            this.lower = lower;
+        }
+
+        public ExpNode getUpper() {
+            return upper;
+        }
+
+        public void setUpper(ExpNode upper) {
+            this.upper = upper;
+        }
+
+        public ListNode getBody() {
+            return body;
         }
     }
 }

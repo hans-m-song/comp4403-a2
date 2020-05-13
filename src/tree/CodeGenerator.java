@@ -228,6 +228,11 @@ public class CodeGenerator implements DeclVisitor, StatementTransform<Code>,
         endGen("While");
         return code;
     }
+
+    @Override
+    public Code visitForNode(ForNode node) {
+        return null;
+    }
     //************* Expression node code generation visit methods
 
     /**

@@ -233,6 +233,13 @@ public class StaticChecker implements DeclVisitor, StatementVisitor,
         endCheck("While");
     }
 
+    @Override
+    public void visitForNode(ForNode node) {
+
+        beginCheck("For");
+        endCheck("For");
+    }
+
     /*************************************************
      *  Expression node static checker visit methods.
      *  The static checking visitor methods for expressions

@@ -459,8 +459,15 @@ Statement ::= KW_WHILE Condition:c KW_DO Statement:s
         {: 
             RESULT = new StatementNode.WhileNode(cxleft, c, s);
         :}
+    | KW_FOR IDENTIFIER:id COLON Condition:lower RANGE Condition:upper KW_DO
+      StatementList:sl KW_OD
+        {:
+            ExpNode index = new ExpNode.IdentifierNode(idxleft, id);
+            RESULT = new StatementNode.ForNode(idxleft, index, lower, upper,
+                new StatementNode.ListNode(slxleft, sl));
+        :}
     |  KW_IF Condition:c KW_THEN Statement:s1 KW_ELSE Statement:s2
-        {: 
+        {:
             RESULT = new StatementNode.IfNode(cxleft, c, s1, s2);
         :}
     |  CompoundStatement:s
