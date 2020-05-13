@@ -328,6 +328,33 @@ public class CodeGenerator implements DeclVisitor, StatementTransform<Code>,
         endGen("Binary");
         return code;
     }
+
+    private void visitSucc(ExpNode.UnaryNode node, Code code) {
+        Type.ScalarType bounds = (Type.ScalarType) node.getType();
+        int width = bounds.getUpper() + 1 - bounds.getLower();
+        code.generateOp(Operation.DUP);
+        code.genLoadConstant(bounds.getUpper());
+        code.generateOp(Operation.EQUAL);
+        code.genLoadConstant(-width);
+        code.generateOp(Operation.MPY);
+        code.generateOp(Operation.ADD);;
+        code.genLoadConstant(1);
+        code.generateOp(Operation.ADD);
+    }
+
+    private void visitPred(ExpNode.UnaryNode node, Code code) {
+        Type.ScalarType bounds = (Type.ScalarType) node.getType();
+        int width = bounds.getUpper() + 1 - bounds.getLower();
+        code.generateOp(Operation.DUP);
+        code.genLoadConstant(bounds.getLower());
+        code.generateOp(Operation.EQUAL);
+        code.genLoadConstant(width);
+        code.generateOp(Operation.MPY);
+        code.generateOp(Operation.ADD);
+        code.genLoadConstant(-1);
+        code.generateOp(Operation.ADD);
+    }
+
     /**
      * Generate code for a unary operator expression.
      */
@@ -337,6 +364,12 @@ public class CodeGenerator implements DeclVisitor, StatementTransform<Code>,
         switch (node.getOp()) {
             case NEG_OP:
                 code.generateOp(Operation.NEGATE);
+                break;
+            case SUCC_OP:
+                visitSucc(node, code);
+                break;
+            case PRED_OP:
+                visitPred(node, code);
                 break;
             default:
                 errors.fatal("PL0 Internal error: Unknown operator",
