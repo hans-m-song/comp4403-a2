@@ -135,7 +135,7 @@ public class StaticChecker implements DeclVisitor, StatementVisitor,
                     left instanceof ExpNode.VariableNode &&
                     ((ExpNode.VariableNode) left).getVariable().isReadOnly()
             ) {
-                staticError("Variable is read-only", left.getLocation());
+                staticError("can't assign to for loop control variable", left.getLocation());
             }
             node.setExp(baseType.coerceExp(exp));
         } else if (left.getType() != Type.ERROR_TYPE) {
@@ -241,16 +241,17 @@ public class StaticChecker implements DeclVisitor, StatementVisitor,
 
     public void visitForNode(ForNode node) {
         beginCheck("For");
+        currentScope = currentScope.extendCurrentScope();
         ExpNode lower = node.getLower().transform(this);
         ExpNode upper = node.getUpper().transform(this);
         Type lowerType = lower.getType().optDereferenceType().optWidenSubrange();
         Type upperType = upper.getType().optDereferenceType().optWidenSubrange();
+        lowerType.coerceExp(upper);
         if (!lowerType.equals(upperType)) {
-            staticError("Bound types do not match", lower.getLocation());
+            staticError("types of upper and lower bounds must match", lower.getLocation());
         }
         node.setLower(lower);
         node.setUpper(upper);
-        currentScope = currentScope.extendCurrentScope();
         SymEntry.VarEntry var = currentScope.addVariable(node.getIndexId(),
                 node.getLocation(), new Type.ReferenceType(lowerType));
         var.setReadOnly(true);
