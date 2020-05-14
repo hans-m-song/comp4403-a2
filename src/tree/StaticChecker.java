@@ -479,10 +479,14 @@ public class StaticChecker implements DeclVisitor, StatementVisitor,
         ExpNode leftValue = node.getLeftValue().transform(this);
         node.setLeftValue(leftValue);
         Type.ArrayType arrayType = leftValue.getType().getArrayType();
-        node.setType(new Type.ReferenceType(arrayType.getResultType()));
-        ExpNode index = node.getIndex().transform(this);
-        arrayType.getArgType().coerceExp(index);
-        node.setIndex(index);
+        if (arrayType != null) {
+            node.setType(new Type.ReferenceType(arrayType.getResultType()));
+            ExpNode index = node.getIndex().transform(this);
+            arrayType.getArgType().coerceExp(index);
+            node.setIndex(index);
+        } else {
+            staticError("Left type must be an array type", leftValue.getLocation());
+        }
         endCheck("ArrayDereference");
         return node;
     }
