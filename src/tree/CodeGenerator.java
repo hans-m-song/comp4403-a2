@@ -229,9 +229,74 @@ public class CodeGenerator implements DeclVisitor, StatementTransform<Code>,
         return code;
     }
 
+    private Code load(ExpNode var) {
+        Code code = var.genCode(this);
+        if (var instanceof ExpNode.VariableNode) {
+            code.genLoad(var.getType());
+        }
+        return code;
+    }
+
+    private Code assign(ExpNode var, ExpNode val) {
+        Code code = load(val);
+        code.append(var.genCode(this));
+        code.genStore(val.getType());
+        return code;
+    }
+
+    private Code increment(ExpNode var) {
+        Code code = var.genCode(this);
+        code.genLoad(var.getType());
+        code.generateOp(Operation.ONE);
+        code.generateOp(Operation.ADD);
+        code.append(var.genCode(this));
+        code.genStore(var.getType());
+        return code;
+    }
+
+    private Code condition(Code left, Code right, Operation op) {
+        Code code = new Code();
+        code.append(left);
+        code.append(right);
+        code.generateOp(op);
+        return code;
+    }
+
+    private Code and(Code left, Code right) {
+        Code code = new Code();
+        code.append(left);
+        code.append(right);
+        code.generateOp(Operation.ADD);
+        code.genLoadConstant(2);
+        code.generateOp(Operation.EQUAL);
+        return code;
+    }
+
     @Override
     public Code visitForNode(ForNode node) {
-        return null;
+        beginGen("For");
+        ExpNode index = node.getIndex();
+        ExpNode lower = node.getLower();
+        ExpNode upper = node.getUpper();
+        ListNode body = node.getBody();
+        Code initializeControl = assign(index, lower);
+        Code incrementControl = increment(index);
+        Code bodyCode = body.genCode(this);
+        Code code = new Code();
+        code.append(initializeControl);
+        code.append(and(
+                condition(load(lower), load(index), Operation.LESSEQ),
+                condition(load(index), load(upper), Operation.LESSEQ)));
+        code.genJumpIfFalse(bodyCode.size()
+                + incrementControl.size()
+                + Code.SIZE_JUMP_ALWAYS);
+        code.append(bodyCode);
+        code.append(incrementControl);
+        code.genJumpAlways(-(code.size()
+                - initializeControl.size()
+                + Code.SIZE_JUMP_ALWAYS));
+        endGen("For");
+        return code;
     }
     //************* Expression node code generation visit methods
 

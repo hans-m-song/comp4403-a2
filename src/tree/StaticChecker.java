@@ -239,7 +239,6 @@ public class StaticChecker implements DeclVisitor, StatementVisitor,
         endCheck("While");
     }
 
-    @Override
     public void visitForNode(ForNode node) {
         beginCheck("For");
         ExpNode lower = node.getLower().transform(this);
