@@ -131,6 +131,12 @@ public class StaticChecker implements DeclVisitor, StatementVisitor,
              * right side expression is coerced to the base type of
              * type of the left side LValue. */
             Type baseType = ((Type.ReferenceType) left.getType()).getBaseType();
+            if (
+                    left instanceof ExpNode.VariableNode &&
+                    ((ExpNode.VariableNode) left).getVariable().isReadOnly()
+            ) {
+                staticError("Variable is read-only", left.getLocation());
+            }
             node.setExp(baseType.coerceExp(exp));
         } else if (left.getType() != Type.ERROR_TYPE) {
                 staticError("variable expected", left.getLocation());
@@ -248,6 +254,7 @@ public class StaticChecker implements DeclVisitor, StatementVisitor,
         currentScope = currentScope.extendCurrentScope();
         SymEntry.VarEntry var = currentScope.addVariable(node.getIndexId(),
                 node.getLocation(), new Type.ReferenceType(lowerType));
+        var.setReadOnly(true);
         ExpNode index = new ExpNode.VariableNode(node.getLocation(), var);
         node.setIndex(index.transform(this));
         node.getBody().accept(this);
