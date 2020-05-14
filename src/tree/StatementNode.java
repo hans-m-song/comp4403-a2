@@ -1,7 +1,6 @@
 package tree;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import java_cup.runtime.ComplexSymbolFactory.Location;
 import syms.Scope;
@@ -450,15 +449,16 @@ public abstract class StatementNode {
     }
 
     public static class ForNode extends StatementNode {
+        private final String indexId;
         private ExpNode index;
         private ExpNode lower;
         private ExpNode upper;
-        private ListNode body;
+        private final ListNode body;
 
-        public ForNode(Location loc, ExpNode index, ExpNode lower,
+        public ForNode(Location loc, String indexId, ExpNode lower,
                        ExpNode upper, ListNode body) {
             super(loc);
-            this.index = index;
+            this.indexId = indexId;
             this.lower = lower;
             this.upper = upper;
             this.body = body;
@@ -478,6 +478,10 @@ public abstract class StatementNode {
         public String toString(int level) {
             return "FOR " + index + " : [" + lower + ".." + upper + "] DO" +
                     newLine(level + 1) + body.toString(level + 1);
+        }
+
+        public String getIndexId() {
+            return indexId;
         }
 
         public ExpNode getIndex() {

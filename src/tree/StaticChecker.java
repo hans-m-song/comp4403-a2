@@ -235,12 +235,23 @@ public class StaticChecker implements DeclVisitor, StatementVisitor,
 
     @Override
     public void visitForNode(ForNode node) {
-
         beginCheck("For");
-        node.setIndex(node.getIndex().transform(this));
-        node.setLower(node.getLower().transform(this));
-        node.setUpper(node.getUpper().transform(this));
+        ExpNode lower = node.getLower().transform(this);
+        ExpNode upper = node.getUpper().transform(this);
+        Type lowerType = lower.getType().optDereferenceType().optWidenSubrange();
+        Type upperType = upper.getType().optDereferenceType().optWidenSubrange();
+        if (!lowerType.equals(upperType)) {
+            staticError("Bound types do not match", lower.getLocation());
+        }
+        node.setLower(lower);
+        node.setUpper(upper);
+        currentScope = currentScope.extendCurrentScope();
+        SymEntry.VarEntry var = currentScope.addVariable(node.getIndexId(),
+                node.getLocation(), new Type.ReferenceType(lowerType));
+        ExpNode index = new ExpNode.VariableNode(node.getLocation(), var);
+        node.setIndex(index.transform(this));
         node.getBody().accept(this);
+        currentScope = currentScope.getParent();
         endCheck("For");
     }
 
