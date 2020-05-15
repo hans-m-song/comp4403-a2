@@ -453,6 +453,9 @@ public abstract class StatementNode {
         private ExpNode index;
         private ExpNode lower;
         private ExpNode upper;
+        private int lowerStore;
+        private int upperStore;
+        private int indexStore;
         private final ListNode body;
 
         public ForNode(Location loc, String indexId, ExpNode lower,
@@ -506,6 +509,30 @@ public abstract class StatementNode {
 
         public void setUpper(ExpNode upper) {
             this.upper = upper;
+        }
+
+        public void setLowerStore(int lowerStore) {
+            this.lowerStore = lowerStore;
+        }
+
+        public int getLowerStore() {
+            return this.lowerStore;
+        }
+
+        public void setUpperStore(int upperStore) {
+            this.upperStore = upperStore;
+        }
+
+        public int getUpperStore() {
+            return this.upperStore;
+        }
+
+        public void setIndexStore(int indexStore) {
+            this.indexStore = indexStore;
+        }
+
+        public int getIndexStore() {
+            return this.indexStore;
         }
 
         public ListNode getBody() {

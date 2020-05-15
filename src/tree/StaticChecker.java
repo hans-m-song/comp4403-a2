@@ -241,7 +241,6 @@ public class StaticChecker implements DeclVisitor, StatementVisitor,
 
     public void visitForNode(ForNode node) {
         beginCheck("For");
-        currentScope = currentScope.extendCurrentScope();
         ExpNode lower = node.getLower().transform(this);
         ExpNode upper = node.getUpper().transform(this);
         Type lowerType = lower.getType().optDereferenceType().optWidenSubrange();
@@ -252,6 +251,9 @@ public class StaticChecker implements DeclVisitor, StatementVisitor,
         }
         node.setLower(lower);
         node.setUpper(upper);
+        node.setLowerStore(currentScope.allocVariableSpace(lowerType.getSpace()));
+        node.setUpperStore(currentScope.allocVariableSpace(upperType.getSpace()));
+        currentScope = currentScope.extendCurrentScope();
         SymEntry.VarEntry var = currentScope.addVariable(node.getIndexId(),
                 node.getLocation(), new Type.ReferenceType(lowerType));
         var.setReadOnly(true);

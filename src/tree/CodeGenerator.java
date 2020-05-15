@@ -229,6 +229,13 @@ public class CodeGenerator implements DeclVisitor, StatementTransform<Code>,
         return code;
     }
 
+    private Code loadConstAsVar(int address, Type type) {
+        Code code = new Code();
+        code.genLoadConstant(address);
+        code.genLoad(type);
+        return code;
+    }
+
     private Code load(ExpNode var) {
         Code code = var.genCode(this);
         if (var instanceof ExpNode.VariableNode) {
@@ -272,6 +279,19 @@ public class CodeGenerator implements DeclVisitor, StatementTransform<Code>,
         return code;
     }
 
+    private Code invariant(ExpNode index, ExpNode lower, int lowerStore,
+                           ExpNode upper, int upperStore) {
+        Code code = new Code();
+        code.append(assign(index, lower));
+        code.append(load(lower));
+        code.genLoadConstant(lowerStore);
+        code.genStore(lower.getType());
+        code.append(load(upper));
+        code.genLoadConstant(upperStore);
+        code.genStore(upper.getType());
+        return code;
+    }
+
     @Override
     public Code visitForNode(ForNode node) {
         beginGen("For");
@@ -279,21 +299,27 @@ public class CodeGenerator implements DeclVisitor, StatementTransform<Code>,
         ExpNode lower = node.getLower();
         ExpNode upper = node.getUpper();
         ListNode body = node.getBody();
-        Code initializeControl = assign(index, lower);
+        Code initialiseInvariant = invariant(index,
+                lower, node.getLowerStore(),
+                upper, node.getUpperStore());
         Code incrementControl = increment(index);
         Code bodyCode = body.genCode(this);
         Code code = new Code();
-        code.append(initializeControl);
+        code.append(initialiseInvariant);
         code.append(and(
-                condition(load(lower), load(index), Operation.LESSEQ),
-                condition(load(index), load(upper), Operation.LESSEQ)));
+                condition(loadConstAsVar(node.getLowerStore(), lower.getType()),
+                        load(index),
+                        Operation.LESSEQ),
+                condition(load(index),
+                        loadConstAsVar(node.getUpperStore(), upper.getType()),
+                        Operation.LESSEQ)));
         code.genJumpIfFalse(bodyCode.size()
                 + incrementControl.size()
                 + Code.SIZE_JUMP_ALWAYS);
         code.append(bodyCode);
         code.append(incrementControl);
         code.genJumpAlways(-(code.size()
-                - initializeControl.size()
+                - initialiseInvariant.size()
                 + Code.SIZE_JUMP_ALWAYS));
         endGen("For");
         return code;
