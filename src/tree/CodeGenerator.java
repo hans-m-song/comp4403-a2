@@ -407,7 +407,7 @@ public class CodeGenerator implements DeclVisitor, StatementTransform<Code>,
         code.generateOp(Operation.EQUAL);
         code.genLoadConstant(-width);
         code.generateOp(Operation.MPY);
-        code.generateOp(Operation.ADD);;
+        code.generateOp(Operation.ADD);
         code.genLoadConstant(1);
         code.generateOp(Operation.ADD);
     }
